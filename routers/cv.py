@@ -96,7 +96,8 @@ async def analyze_cv(
         ats_report = analyze_cv_ats(
             pdf_path=file_path,
             extracted_text=full_text,
-            expected_skills=expected_skill_names
+            expected_skills=expected_skill_names,
+            ocr_data=ocr_data
         )
 
         # 6. الرد الصافي للفرونت إند (مع تقرير الـ ATS)
