@@ -1,0 +1,24 @@
+{
+  "SKILLS_DB": {
+    "Frontend Developer": {
+            "required_skills": ["HTML", "CSS", "JavaScript", "Git", "REST API"],
+            "nice_to_have": ["React.js", "TypeScript", "Vue", "Redux", "Figma", "Sass", "Webpack"]
+        },
+        "Backend Developer": {
+            "required_skills": ["SQL", "Git", "REST API", "OOP", "Algorithm"],
+            "nice_to_have": ["Python", "Java", "PHP", "Node.js", "MySQL", "PostgreSQL", "MongoDB", "FastAPI", "Django", "Spring", "Laravel", "Docker", "Linux"]
+        },
+        "Full Stack Developer": {
+            "required_skills": ["HTML", "CSS", "JavaScript", "SQL", "Git", "REST API", "OOP"],
+            "nice_to_have": ["React.js", "Node.js", "Python", "PHP", "Docker", "MongoDB", "MySQL", "FastAPI"]
+        },
+        "AI Engineer": {
+            "required_skills": ["Python", "SQL", "NumPy", "Pandas", "Algorithm", "Machine Learning"],
+            "nice_to_have": ["TensorFlow", "PyTorch", "Scikit-learn", "Matplotlib", "Git", "Docker"]
+        },
+        "Network Engineer": {
+            "required_skills": ["Linux", "Bash", "Git", "Python"],
+            "nice_to_have": ["Docker", "AWS", "Kubernetes", "Apache", "NGINX", "CI/CD", "Terraform"]
+        }
+    }
+}
