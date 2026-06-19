@@ -150,6 +150,11 @@ def detect_multi_column_layout(pdf_path, ocr_data=None):
     1) يجرب pdfplumber أولاً (سريع، يعمل مع PDF النصي العادي).
     2) إذا رجع pdfplumber صفر كلمات (PDF صورة/ممسوح)، يستخدم ocr_data
        الجاهز (الممرر أصلاً من pdf_parser.py) بدون إعادة تشغيل OCR من جديد.
+
+    المنطق: نقسم عرض الصفحة لخلايا أفقية صغيرة (buckets)، ونكتشف وجود
+    فجوة فراغ متواصلة بين منطقتين فيهما كلمات كافية (مثل sidebar
+    ضيق + محتوى رئيسي عريض)، بدل الاعتماد على نسبة عدد الكلمات
+    التي تفشل عند تخطيطات الأعمدة غير المتساوية (sidebar صغير).
     """
     x_positions = []
     page_width = None
@@ -178,16 +183,45 @@ def detect_multi_column_layout(pdf_path, ocr_data=None):
         except (IndexError, TypeError):
             pass
 
-    if not x_positions or len(x_positions) < 10 or not page_width:
+    if not x_positions or len(x_positions) < 15 or not page_width:
         return False
 
-    left_half = sum(1 for x in x_positions if x < page_width / 2)
-    right_half = sum(1 for x in x_positions if x >= page_width / 2)
+    # تقسيم عرض الصفحة لـ 20 خلية، وعدّ الكلمات التي تبدأ بكل خلية
+    num_buckets = 20
+    bucket_width = page_width / num_buckets
+    bucket_counts = [0] * num_buckets
 
-    if left_half > 10 and right_half > 10:
-        ratio = min(left_half, right_half) / max(left_half, right_half)
-        if ratio > 0.3:
-            return True
+    for x in x_positions:
+        idx = min(int(x / bucket_width), num_buckets - 1)
+        bucket_counts[idx] += 1
+
+    # نبحث عن فجوة فراغ متواصلة بين منطقتين فيهما كلمات.
+    # نتجاهل أول وآخر خليتين (هوامش الصفحة الطبيعية).
+    gap_start = None
+    for idx in range(2, num_buckets - 2):
+        if bucket_counts[idx] == 0:
+            if gap_start is None:
+                gap_start = idx
+        else:
+            if gap_start is not None:
+                gap_width = idx - gap_start  # عدد الخلايا الفاضية المتتالية
+                left_density = sum(bucket_counts[:gap_start])
+                right_density = sum(bucket_counts[idx:])
+                smaller_side = min(left_density, right_density)
+                larger_side = max(left_density, right_density)
+
+                # الحالة 1: عمودان متقاربان نسبياً (كل جهة 10%+ من الإجمالي)
+                balanced_case = smaller_side >= max(5, len(x_positions) * 0.1)
+
+                # الحالة 2: عمود رفيع جداً (مثل sidebar فيه عناوين أقسام فقط)
+                # نقبله إذا كان فيه 5+ كلمات مستقلة وفجوة عريضة بوضوح (2+ خلايا فاضية)
+                # لتمييزه عن كلمة شاردة بزاوية الصفحة (false positive)
+                narrow_sidebar_case = smaller_side >= 5 and gap_width >= 2
+
+                if larger_side > 0 and (balanced_case or narrow_sidebar_case):
+                    return True
+                gap_start = None
+
     return False
 
 # ==========================================

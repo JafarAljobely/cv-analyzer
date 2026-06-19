@@ -6,7 +6,7 @@
         },
         "Backend Developer": {
             "required_skills": ["SQL", "Git", "REST API", "OOP", "Algorithm"],
-            "nice_to_have": ["Python", "Java", "PHP", "Node.js", "MySQL", "PostgreSQL", "MongoDB", "FastAPI", "Django", "Spring", "Laravel", "Docker", "Linux"]
+            "nice_to_have": ["Python","Ruby","Rust", "Java", "PHP", "Node.js", "C++", "MySQL", "PostgreSQL", "MongoDB", "FastAPI", "Django", "Spring", "Laravel", "Docker", "Linux"]
         },
         "Full Stack Developer": {
             "required_skills": ["HTML", "CSS", "JavaScript", "SQL", "Git", "REST API", "OOP"],
