@@ -383,3 +383,4 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
         "issues": issues,
         "passed": passed
     }
+make sure
