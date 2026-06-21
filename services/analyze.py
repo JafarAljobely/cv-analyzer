@@ -5,6 +5,36 @@ from thefuzz import fuzz
 import pdfplumber
 from docx import Document
 
+
+def _edit_distance(a: str, b: str) -> int:
+    """
+    حساب Levenshtein edit distance بين كلمتين (أقل عدد تعديلات حرف واحد
+    لتحويل كلمة لأخرى). تُستخدم لاكتشاف أخطاء OCR الشائعة (استبدال حرف
+    متشابه بصرياً مثل G/C أو O/0) بدون الحاجة لقاموس تصحيحات يدوي.
+    """
+    if len(a) < len(b):
+        return _edit_distance(b, a)
+    if len(b) == 0:
+        return len(a)
+    previous_row = list(range(len(b) + 1))
+    for i, c1 in enumerate(a):
+        current_row = [i + 1]
+        for j, c2 in enumerate(b):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    return previous_row[-1]
+
+
+# الطول الأدنى لاسم المهارة بقاعدة البيانات لتطبيق المطابقة المتسامحة (fuzzy).
+# كلمات أقصر من هذا معرّضة لتطابقات عرضية مع كلمات عادية (مثل Git/Get)
+# فنستثنيها من هذا الفحص حفاظاً على الدقة.
+MIN_LENGTH_FOR_FUZZY = 5
+# أقصى عدد تعديلات حرف مسموح به لاعتبار الكلمتين "نفس المهارة" مع خطأ OCR
+MAX_EDIT_DISTANCE_FOR_FUZZY = 1
+
 # ==========================================
 # 1. قراءة قاعدة البيانات ديناميكياً من الـ JSON
 # ==========================================
@@ -13,11 +43,14 @@ from docx import Document
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JSON_FILE_PATH = os.path.join(BASE_DIR, "data", "skills_db.json")
 
-# قراءة البيانات وتخزينها في المتغير الأساسي SKILLS_DB عند إقلاع السيرفر
-# 🔥 ملاحظة: الملف الأصلي بصيغة {"SKILLS_DB": {...}} فننزل مستوى واحد عند التحميل
+# قراءة البيانات وتخزينها في المتغيرات الأساسية عند إقلاع السيرفر
+# 🔥 ملاحظة: الملف الجديد يحوي مفتاحين: GLOBAL_SKILLS_POOL (مستودع مهارات عام وموسع
+# يشمل مجالات إضافية مثل Mobile/DevOps/Design حتى لو لا يوجد لها مسار وظيفي بالكود)
+# و SKILLS_DB (المسارات الوظيفية الخمسة المستخدمة لحساب نسبة التوافق فقط)
 with open(JSON_FILE_PATH, "r", encoding="utf-8") as file:
     _raw_db = json.load(file)
-    SKILLS_DB = _raw_db.get("SKILLS_DB", _raw_db)
+    SKILLS_DB = _raw_db.get("SKILLS_DB", {})
+    GLOBAL_SKILLS_POOL = _raw_db.get("GLOBAL_SKILLS_POOL", [])
 
 
 # القاموس المساعد للمرادفات والاختصارات الشائعة
@@ -53,11 +86,14 @@ def extract_skills(ocr_data):
 
     found_skills = set()
 
-    # 1. تجميع كل الكلمات الفريدة من قاعدة البيانات لفحصها
-    all_db_skills = set()
-    for career, data in SKILLS_DB.items():
-        all_db_skills.update(data.get("required_skills", []))
-        all_db_skills.update(data.get("nice_to_have", []))
+    # 1. الفحص يتم على المستودع العام للمهارات (يشمل كل المجالات حتى لو
+    #    لم يكن لها مسار وظيفي معرّف بالكود، مثل Mobile/DevOps/Design/QA)
+    all_db_skills = set(GLOBAL_SKILLS_POOL)
+
+    # تجزيء النص لكلمات منفردة (نحتاجها لاحقاً لمطابقة fuzzy كلمة-بكلمة،
+    # وليس فحص الكلمة داخل النص الكامل كسلسلة طويلة، لأن edit_distance
+    # بين كلمة قصيرة ونص طويل غير منطقي وغير دقيق)
+    text_words = full_text_clean.split()
 
     # 2. فحص وجود المهارات أو مرادفاتها داخل النص المنظف
     for skill in all_db_skills:
@@ -76,10 +112,28 @@ def extract_skills(ocr_data):
 
         # فحص المرادفات والاختصارات الشائعة للمهارة
         aliases = SKILL_ALIASES.get(skill_lower, [])
+        matched_via_alias = False
         for alias in aliases:
             if re.search(r'\b' + re.escape(alias) + r'\b', full_text_clean):
                 found_skills.add(skill)
+                matched_via_alias = True
                 break
+        if matched_via_alias:
+            continue
+
+        # 3. fallback أخير: مطابقة متسامحة (fuzzy) لاكتشاف أخطاء OCR الشائعة
+        # (مثل استبدال حرف متشابه بصرياً: NGINX -> NCINX). تُطبّق فقط على
+        # مهارات بطول كافٍ (MIN_LENGTH_FOR_FUZZY) وبأقصى خطأ حرف واحد
+        # (MAX_EDIT_DISTANCE_FOR_FUZZY) لتقليل احتمال التطابق العرضي
+        # مع كلمات عادية لا علاقة لها بالمهارة (false positives).
+        if skill_clean.isalpha() and len(skill_clean) >= MIN_LENGTH_FOR_FUZZY:
+            for word in text_words:
+                word_clean = re.sub(r'[^a-zA-Z]', '', word)
+                if not word_clean or abs(len(word_clean) - len(skill_clean)) > MAX_EDIT_DISTANCE_FOR_FUZZY:
+                    continue
+                if _edit_distance(word_clean, skill_clean) <= MAX_EDIT_DISTANCE_FOR_FUZZY:
+                    found_skills.add(skill)
+                    break
 
     return sorted(list(found_skills))
 
@@ -118,19 +172,39 @@ def analyze_career_paths(extracted_list):
         matched_required = [s for s in required if is_skill_covered(s, extracted_clean)]
         matched_nice = [s for s in nice_to_have if is_skill_covered(s, extracted_clean)]
 
-        missing_required = [{"skill": s, "importance": "required"} for s in required if not is_skill_covered(s, extracted_clean)]
-        missing_nice = [{"skill": s, "importance": "nice_to_have"} for s in nice_to_have if not is_skill_covered(s, extracted_clean)]
+        missing_required_list = [s for s in required if not is_skill_covered(s, extracted_clean)]
+        missing_nice_list = [s for s in nice_to_have if not is_skill_covered(s, extracted_clean)]
 
-        # حساب النقاط (الأساسية وزنها 20، والإضافية وزنها 10)
-        user_points = (len(matched_required) * 20) + (len(matched_nice) * 10)
-        base_target_points = len(required) * 20 if required else 20
-        match_score = int(min((user_points / base_target_points) * 100, 100))
+        # -----------------------------------------------------------
+        # حساب match_score: لا حاجة لامتلاك كل nice_to_have.
+        # الأساسيات (required) وزنها الأكبر، وامتلاك حد معقول من
+        # nice_to_have (نعتبر 5 كافية للحصول على النقاط الكاملة لهذا الجزء)
+        # يكفي ليعكس تنوع سوق العمل بدون مطالبة غير واقعية بكل الأدوات.
+        # -----------------------------------------------------------
+        NICE_TO_HAVE_CAP = 5  # عدد nice_to_have الكافي لتحقيق النقاط الكاملة لهذا الجزء
+
+        required_ratio = (len(matched_required) / len(required)) if required else 1.0
+        nice_ratio = min(len(matched_nice) / NICE_TO_HAVE_CAP, 1.0) if nice_to_have else 1.0
+
+        # الأساسيات تمثل 70% من السكور، والإضافية تمثل 30%
+        match_score = int(round((required_ratio * 70) + (nice_ratio * 30)))
+        match_score = max(0, min(100, match_score))
+
+        # -----------------------------------------------------------
+        # عرض أهم 5 مهارات ناقصة فقط (بالأولوية): الأساسية الناقصة أولاً،
+        # ثم الإضافية الناقصة، بدل عرض كل القائمة (قد تتجاوز 15-20 عنصر)
+        # -----------------------------------------------------------
+        TOP_MISSING_LIMIT = 5
+        prioritized_missing = (
+            [{"skill": s, "importance": "required"} for s in missing_required_list] +
+            [{"skill": s, "importance": "nice_to_have"} for s in missing_nice_list]
+        )[:TOP_MISSING_LIMIT]
 
         career_paths_raw[career_title] = {
             "title": career_title,
             "match_score": match_score,
             "matched_skills": matched_required + matched_nice,
-            "missing_skills": missing_required + missing_nice
+            "missing_skills": prioritized_missing
         }
 
     # ترتيب المسارات من الأعلى توافقاً إلى الأقل

@@ -1,24 +1,68 @@
 {
+  "GLOBAL_SKILLS_POOL": [
+    "HTML", "CSS", "JavaScript", "TypeScript",
+    "React.js", "Vue.js", "Angular", "Svelte", "Next.js", "Nuxt.js", "Gatsby", "jQuery",
+    "Redux", "Zustand", "MobX", "Vuex", "Pinia", "Context API",
+    "Sass", "Less", "Tailwind CSS", "Bootstrap", "Material UI", "Styled Components", "CSS Modules",
+    "Webpack", "Vite", "Parcel", "Babel", "ESLint", "Prettier",
+    "Jest", "Cypress", "React Testing Library", "Storybook",
+    "Responsive Design", "DOM Manipulation", "Web Accessibility", "PWA", "SEO Basics",
+    "Web Performance Optimization", "Browser DevTools", "Cross-Browser Compatibility", "Micro Frontends",
+    "REST API", "GraphQL", "Axios", "Fetch API", "WebSockets",
+
+    "Node.js", "Express.js", "Python", "Django", "Flask", "FastAPI",
+    "Java", "Spring", "Spring Boot", "PHP", "Laravel", "Ruby", "Ruby on Rails",
+    "C#", ".NET", "Go", "Rust", "Microservices", "OOP", "Algorithm", "Data Structures",
+    "Authentication", "Message Queues", "Kafka", "RabbitMQ",
+
+    "SQL", "MySQL", "PostgreSQL", "MongoDB", "Redis", "SQLite", "Oracle",
+    "Firebase", "Elasticsearch", "NoSQL", "Database Design",
+
+    "Flutter", "Dart", "React Native", "Swift", "SwiftUI", "Kotlin", "Xamarin", "Mobile UI Design",
+
+    "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Ansible",
+    "CI/CD", "Jenkins", "GitHub Actions", "NGINX", "Apache", "Linux", "Bash",
+    "Networking Fundamentals", "TCP/IP", "OSI Model", "Subnetting", "DNS", "DHCP", "HTTP/HTTPS",
+    "Network Security", "Firewall", "VPN", "IDS/IPS", "SSL/TLS", "Penetration Testing Basics",
+    "Cisco", "Routing", "Switching", "BGP", "OSPF", "VLAN", "Load Balancing",
+    "Windows Server", "Wireshark", "AWS Networking", "Azure Networking", "GCP Networking",
+    "Docker Networking", "Kubernetes Networking", "Monitoring Tools", "Nagios", "Zabbix",
+    "Prometheus", "Grafana", "SNMP", "PowerShell",
+
+    "NumPy", "Pandas", "Machine Learning", "Deep Learning", "TensorFlow", "PyTorch",
+    "Scikit-learn", "Keras", "NLP", "Computer Vision", "Data Visualization",
+    "Matplotlib", "Seaborn", "Jupyter", "Statistics", "A/B Testing", "MLOps",
+    "Hugging Face", "LangChain", "OpenCV", "ETL", "Apache Spark", "Power BI", "Tableau",
+
+    "Figma", "Adobe XD", "Photoshop", "Illustrator", "Sketch",
+    "UI Design", "UX Research", "Wireframing", "Prototyping", "Design Systems",
+
+    "Manual Testing", "Automated Testing", "Selenium", "JUnit", "Postman",
+    "Test Cases", "Bug Tracking",
+
+    "Git", "GitHub", "GitLab", "Agile", "Scrum", "Jira", "Confluence", "Project Management"
+  ],
+
   "SKILLS_DB": {
     "Frontend Developer": {
-            "required_skills": ["HTML", "CSS", "JavaScript", "Git", "REST API"],
-            "nice_to_have": ["React.js", "TypeScript", "Vue", "Redux", "Figma", "Sass", "Webpack"]
-        },
-        "Backend Developer": {
-            "required_skills": ["SQL", "Git", "REST API", "OOP", "Algorithm"],
-            "nice_to_have": ["Python","Ruby","Rust", "Java", "PHP", "Node.js", "C++", "MySQL", "PostgreSQL", "MongoDB", "FastAPI", "Django", "Spring", "Laravel", "Docker", "Linux"]
-        },
-        "Full Stack Developer": {
-            "required_skills": ["HTML", "CSS", "JavaScript", "SQL", "Git", "REST API", "OOP"],
-            "nice_to_have": ["React.js", "Node.js", "Python", "PHP", "Docker", "MongoDB", "MySQL", "FastAPI"]
-        },
-        "AI Engineer": {
-            "required_skills": ["Python", "SQL", "NumPy", "Pandas", "Algorithm", "Machine Learning"],
-            "nice_to_have": ["TensorFlow", "PyTorch", "Scikit-learn", "Matplotlib", "Git", "Docker"]
-        },
-        "Network Engineer": {
-            "required_skills": ["Linux", "Bash", "Git", "Python"],
-            "nice_to_have": ["Docker", "AWS", "Kubernetes", "Apache", "NGINX", "CI/CD", "Terraform"]
-        }
+      "required_skills": ["HTML", "CSS", "JavaScript", "Git", "REST API", "Responsive Design", "DOM Manipulation"],
+      "nice_to_have": ["React.js", "TypeScript", "Vue.js", "Angular", "Redux", "Sass", "Webpack", "Vite", "Tailwind CSS", "Bootstrap", "Next.js", "jQuery", "GraphQL", "Jest", "Cypress", "Figma", "Web Accessibility", "PWA"]
+    },
+    "Backend Developer": {
+      "required_skills": ["SQL", "Git", "REST API", "OOP", "Algorithm", "Data Structures", "Authentication"],
+      "nice_to_have": ["Python", "Java", "PHP", "Node.js", "Express.js", "MySQL", "PostgreSQL", "MongoDB", "Redis", "FastAPI", "Django", "Flask", "Spring", "Spring Boot", "Laravel", ".NET", "C#", "GraphQL", "Docker", "Linux", "Microservices", "Message Queues", "Kafka", "RabbitMQ", "CI/CD"]
+    },
+    "Full Stack Developer": {
+      "required_skills": ["HTML", "CSS", "JavaScript", "SQL", "Git", "REST API", "OOP"],
+      "nice_to_have": ["React.js", "Node.js", "Python", "PHP", "Vue.js", "Angular", "TypeScript", "Docker", "MongoDB", "MySQL", "PostgreSQL", "FastAPI", "Express.js", "Next.js", "GraphQL", "Redis", "Microservices", "CI/CD"]
+    },
+    "AI Engineer": {
+      "required_skills": ["Python", "SQL", "NumPy", "Pandas", "Algorithm", "Machine Learning", "Statistics"],
+      "nice_to_have": ["TensorFlow", "PyTorch", "Scikit-learn", "Keras", "Matplotlib", "Seaborn", "Git", "Docker", "NLP", "Computer Vision", "Deep Learning", "Hugging Face", "LangChain", "OpenCV", "MLOps", "Jupyter", "Data Visualization", "A/B Testing"]
+    },
+    "Network Engineer": {
+      "required_skills": ["Linux", "Bash", "Git", "Python", "Networking Fundamentals", "TCP/IP"],
+      "nice_to_have": ["Docker", "AWS", "Azure", "GCP", "Kubernetes", "Apache", "NGINX", "CI/CD", "Terraform", "Ansible", "VPN", "Firewall", "DNS", "Load Balancing", "Cisco", "Network Security", "Monitoring Tools", "Routing", "Switching", "VLAN", "Wireshark"]
     }
+  }
 }
