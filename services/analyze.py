@@ -105,8 +105,13 @@ def extract_skills(ocr_data):
             found_skills.add(skill)
             continue
 
-        # البحث عن اسم المهارة بدون مسافات (مثل React.js كـ Reactjs)
-        if skill_clean in full_text_clean.replace(" ", ""):
+        # البحث عن اسم المهارة بدون مسافات (مثل React.js كـ Reactjs).
+        # هذا الفحص مقيّد بالمهارات المركبة فقط (تحتوي مسافة أو نقطة أو
+        # رمز خاص بأصلها)، لأن تطبيقه على مهارة بكلمة واحدة بسيطة (مثل
+        # "Go") يطابقها بالخطأ كـ substring داخل كلمات أطول غير متعلقة
+        # (مثل "Algorithm")، وهي حالة مغطاة أصلاً بفحص حدود الكلمة أعلاه.
+        is_compound_skill = (" " in skill_lower) or ("." in skill_lower) or ("-" in skill_lower)
+        if is_compound_skill and skill_clean in full_text_clean.replace(" ", ""):
             found_skills.add(skill)
             continue
 
@@ -332,7 +337,7 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
             pass
 
     if has_tables:
-        issues.append("تم اكتشاف جداول داخل الملف. بعض أنظمة ATS تفشل في معالجتها، يفضل استخدام نصوص مباشرة متتالية.")
+        issues.append("تم اكتشاف جداول داخل الملف. بعض أنظمة  تفشل في معالجتها، يفضل استخدام نصوص مباشرة متتالية.")
         score -= 30
     else:
         passed.append("بنية السيرة الذاتية ممتازة وخالية من الجداول المعقدة.")
@@ -383,4 +388,3 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
         "issues": issues,
         "passed": passed
     }
-make sure

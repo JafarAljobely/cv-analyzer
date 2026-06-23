@@ -67,10 +67,6 @@ async def analyze_cv(
 
         # 🔥 تجهيز النص ككتلة واحدة (String) لإرساله لدالة الـ ATS
         full_text = " ".join([item[1] for item in ocr_data if len(item) > 1 and item[1]])
-        print("=" * 60)
-        print("Raw OCR Text:")
-        print(full_text)
-        print("=" * 60)
         # 2. استخراج المهارات
         skills = extract_skills(ocr_data)
         
