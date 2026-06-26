@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import math
 from thefuzz import fuzz
 import pdfplumber
 from docx import Document
@@ -66,6 +67,29 @@ SKILL_ALIASES = {
     "machine learning": ["ml", "scikit-learn", "sklearn"],
     "deep learning": ["dl", "neural networks"],
     "nlp": ["natural language processing", "spacy", "nltk"],
+}
+
+# مهارات أساسية تُستنتج ضمنياً عند وجود مهارة/فريموورك مبني عليها، حتى لو
+# لم يذكرها الشخص صراحة بالـ CV. مثلاً: امتلاك React.js يستحيل عملياً
+# بدون معرفة HTML/CSS/JavaScript، فلا يُعقل اعتبارها "مهارات ناقصة".
+# هذا قابل للتوسعة بسهولة بإضافة مفاتيح جديدة دون تكرار أي منطق.
+IMPLIED_SKILLS = {
+    "react.js": ["HTML", "CSS", "JavaScript"],
+    "vue.js": ["HTML", "CSS", "JavaScript"],
+    "angular": ["HTML", "CSS", "JavaScript", "TypeScript"],
+    "next.js": ["HTML", "CSS", "JavaScript", "React.js"],
+    "nuxt.js": ["HTML", "CSS", "JavaScript", "Vue.js"],
+    "svelte": ["HTML", "CSS", "JavaScript"],
+    "django": ["Python"],
+    "flask": ["Python"],
+    "fastapi": ["Python"],
+    "spring": ["Java"],
+    "spring boot": ["Java"],
+    "laravel": ["PHP"],
+    "ruby on rails": ["Ruby"],
+    "node.js": ["JavaScript"],
+    "express.js": ["Node.js", "JavaScript"],
+    ".net": ["C#"],
 }
 
 # ==========================================
@@ -140,6 +164,21 @@ def extract_skills(ocr_data):
                     found_skills.add(skill)
                     break
 
+    # 4. استنتاج المهارات الأساسية الضمنية: إذا وُجدت مهارة/فريموورك مبني
+    # على مهارة أساسية أخرى (مثل React.js يفترض HTML/CSS/JavaScript)،
+    # نضيف الأساسية ضمناً حتى لو لم تُذكر صراحة بالنص. نمر بحلقة متكررة
+    # (حتى استقرار النتيجة) لتغطية حالات السلسلة مثل Next.js -> React.js
+    # -> HTML/CSS/JavaScript دون الحاجة لتكرار القائمة الكاملة بكل مفتاح.
+    changed = True
+    while changed:
+        changed = False
+        for skill in list(found_skills):
+            implied = IMPLIED_SKILLS.get(skill.lower(), [])
+            for implied_skill in implied:
+                if implied_skill not in found_skills:
+                    found_skills.add(implied_skill)
+                    changed = True
+
     return sorted(list(found_skills))
 
 # ==========================================
@@ -181,18 +220,20 @@ def analyze_career_paths(extracted_list):
         missing_nice_list = [s for s in nice_to_have if not is_skill_covered(s, extracted_clean)]
 
         # -----------------------------------------------------------
-        # حساب match_score: لا حاجة لامتلاك كل nice_to_have.
-        # الأساسيات (required) وزنها الأكبر، وامتلاك حد معقول من
-        # nice_to_have (نعتبر 5 كافية للحصول على النقاط الكاملة لهذا الجزء)
-        # يكفي ليعكس تنوع سوق العمل بدون مطالبة غير واقعية بكل الأدوات.
+        # حساب match_score: يعتمد فقط على المهارات الأساسية (required).
+        # امتلاك كل required → 100% تلقائياً. مهارات nice_to_have لا
+        # تؤثر على السكور بأي شكل، وتبقى للعرض فقط (تظهر بقسم "matched"
+        # إن وُجدت، أو بقسم "missing" تحت تصنيف "يفضل تعلمها") دون أن
+        # تخفّض نتيجة الشخص لعدم امتلاكه أدوات إضافية خارج الأساسيات.
+        #
+        # نطبّق جذراً تربيعياً على النسبة الخام (بدل نسبة خطية مباشرة)
+        # لتخفيف العقاب القاسي عند النقص الجزئي: مثلاً امتلاك نصف
+        # الأساسيات يعطي نتيجة أعلى من 50% (وليس نتيجة قاسية كنسبة
+        # خطية مباشرة)، بينما صفر يبقى صفر وامتلاك الكل يبقى 100%.
         # -----------------------------------------------------------
-        NICE_TO_HAVE_CAP = 5  # عدد nice_to_have الكافي لتحقيق النقاط الكاملة لهذا الجزء
-
         required_ratio = (len(matched_required) / len(required)) if required else 1.0
-        nice_ratio = min(len(matched_nice) / NICE_TO_HAVE_CAP, 1.0) if nice_to_have else 1.0
 
-        # الأساسيات تمثل 70% من السكور، والإضافية تمثل 30%
-        match_score = int(round((required_ratio * 70) + (nice_ratio * 30)))
+        match_score = int(round(math.sqrt(required_ratio) * 100))
         match_score = max(0, min(100, match_score))
 
         # -----------------------------------------------------------
@@ -337,7 +378,7 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
             pass
 
     if has_tables:
-        issues.append("تم اكتشاف جداول داخل الملف. بعض أنظمة  تفشل في معالجتها، يفضل استخدام نصوص مباشرة متتالية.")
+        issues.append("تم اكتشاف جداول داخل الملف. بعض أنظمة ATS تفشل في معالجتها، يفضل استخدام نصوص مباشرة متتالية.")
         score -= 30
     else:
         passed.append("بنية السيرة الذاتية ممتازة وخالية من الجداول المعقدة.")
@@ -380,7 +421,7 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
         score -= 40
 
     score = max(0, min(100, score))
-    is_compliant = score >= 70
+    is_compliant = score >= 60
 
     return {
         "is_compliant": is_compliant,
