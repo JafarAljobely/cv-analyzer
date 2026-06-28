@@ -45,24 +45,24 @@
 
   "SKILLS_DB": {
     "Frontend Developer": {
-      "required_skills": ["HTML", "CSS", "JavaScript", "Git", "REST API", "Responsive Design", "DOM Manipulation"],
-      "nice_to_have": ["React.js", "TypeScript", "Vue.js", "Angular", "Redux", "Sass", "Webpack", "Vite", "Tailwind CSS", "Bootstrap", "Next.js", "jQuery", "GraphQL", "Jest", "Cypress", "Figma", "Web Accessibility", "PWA"]
+      "required_skills": ["HTML", "CSS", "JavaScript", "DOM Manipulation", "Responsive Design", "Git", "REST API"],
+      "nice_to_have": ["Sass", "Bootstrap", "Tailwind CSS", "TypeScript", "React.js", "Vue.js", "Angular", "Redux", "Webpack", "Vite", "Next.js", "jQuery", "GraphQL", "Jest", "Cypress", "Figma", "Web Accessibility", "PWA"]
     },
     "Backend Developer": {
-      "required_skills": ["SQL", "Git", "REST API", "OOP", "Algorithm", "Data Structures", "Authentication"],
-      "nice_to_have": ["Python", "Java", "PHP", "Node.js", "Express.js", "MySQL", "PostgreSQL", "MongoDB", "Redis", "FastAPI", "Django", "Flask", "Spring", "Spring Boot", "Laravel", ".NET", "C#", "GraphQL", "Docker", "Linux", "Microservices", "Message Queues", "Kafka", "RabbitMQ", "CI/CD"]
+      "required_skills": ["Git", "OOP", "Algorithm", "Data Structures", "SQL", "REST API", "Authentication"],
+      "nice_to_have": ["Python", "Java", "PHP", "C#", "Node.js", "Express.js", "Django", "Flask", "FastAPI", "Spring", "Spring Boot", "Laravel", ".NET", "GraphQL", "MySQL", "PostgreSQL", "MongoDB", "Redis", "Docker", "Linux", "Microservices", "Message Queues", "Kafka", "RabbitMQ", "CI/CD"]
     },
     "Full Stack Developer": {
-      "required_skills": ["HTML", "CSS", "JavaScript", "SQL", "Git", "REST API", "OOP"],
-      "nice_to_have": ["React.js", "Node.js", "Python", "PHP", "Vue.js", "Angular", "TypeScript", "Docker", "MongoDB", "MySQL", "PostgreSQL", "FastAPI", "Express.js", "Next.js", "GraphQL", "Redis", "Microservices", "CI/CD"]
+      "required_skills": ["HTML", "CSS", "JavaScript", "Git", "SQL", "REST API", "OOP"],
+      "nice_to_have": ["Node.js", "Python", "PHP", "React.js", "Vue.js", "Angular", "TypeScript", "Express.js", "MySQL", "PostgreSQL", "MongoDB", "FastAPI", "Next.js", "Docker", "GraphQL", "Redis", "Microservices", "CI/CD"]
     },
     "AI Engineer": {
-      "required_skills": ["Python", "SQL", "NumPy", "Pandas", "Algorithm", "Machine Learning", "Statistics"],
-      "nice_to_have": ["TensorFlow", "PyTorch", "Scikit-learn", "Keras", "Matplotlib", "Seaborn", "Git", "Docker", "NLP", "Computer Vision", "Deep Learning", "Hugging Face", "LangChain", "OpenCV", "MLOps", "Jupyter", "Data Visualization", "A/B Testing"]
+      "required_skills": ["Python", "Algorithm", "Statistics", "SQL", "NumPy", "Pandas", "Machine Learning"],
+      "nice_to_have": ["Matplotlib", "Seaborn", "Jupyter", "Git", "Docker", "Scikit-learn", "Deep Learning", "TensorFlow", "PyTorch", "Keras", "NLP", "Computer Vision", "Data Visualization", "Hugging Face", "LangChain", "OpenCV", "A/B Testing", "MLOps"]
     },
     "Network Engineer": {
-      "required_skills": ["Linux", "Bash", "Git", "Python", "Networking Fundamentals", "TCP/IP"],
-      "nice_to_have": ["Docker", "AWS", "Azure", "GCP", "Kubernetes", "Apache", "NGINX", "CI/CD", "Terraform", "Ansible", "VPN", "Firewall", "DNS", "Load Balancing", "Cisco", "Network Security", "Monitoring Tools", "Routing", "Switching", "VLAN", "Wireshark"]
+      "required_skills": ["Linux", "Bash", "Networking Fundamentals", "TCP/IP", "Git", "Python"],
+      "nice_to_have": ["DNS", "Firewall", "VPN", "Routing", "Switching", "VLAN", "Network Security", "Cisco", "Wireshark", "Docker", "AWS", "Azure", "GCP", "Kubernetes", "Terraform", "Ansible", "CI/CD", "Apache", "NGINX", "Load Balancing", "Monitoring Tools"]
     }
   }
 }
