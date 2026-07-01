@@ -93,6 +93,91 @@ IMPLIED_SKILLS = {
 }
 
 # ==========================================
+# 1.5 استنتاج مستوى الخبرة (junior / senior)
+# ==========================================
+
+EXPERIENCE_LEVEL_DEFAULT = "junior"
+
+SENIOR_TITLE_KEYWORDS = [
+    "senior", "lead", "principal", "architect", "head of",
+    "خبير", "كبير مهندسين", "قائد فريق"
+]
+JUNIOR_TITLE_KEYWORDS = [
+    "junior", "intern", "trainee", "fresh graduate", "entry level", "entry-level",
+    "متدرب", "خريج حديث", "مبتدئ"
+]
+
+# أنماط نصية بسيطة (عربي/انكليزي) للبحث عن أرقام جنب كلمات الخبرة
+YEARS_EXPERIENCE_PATTERNS = [
+    r'(\d+)\s*\+?\s*(?:years?|yrs?)\s*(?:of)?\s*experience',
+    r'experience\s*(?:of)?\s*(\d+)\s*\+?\s*(?:years?|yrs?)',
+    r'(\d+)\s*\+?\s*سن(?:ة|وات)\s*خبرة',
+    r'خبرة\s*(?:تزيد\s*عن\s*)?(\d+)\s*\+?\s*سن(?:ة|وات)',
+]
+
+SENIOR_YEARS_THRESHOLD = 4
+SENIOR_SKILLS_COUNT_THRESHOLD = 12
+
+
+def extract_years_of_experience(text: str) -> int:
+    """
+    يدور على أنماط نصية بسيطة (عربي/انكليزي) لاستخراج عدد سنوات الخبرة
+    المذكورة صراحة بالنص. يرجع أعلى رقم تم العثور عليه، أو 0 إن لم يُعثر
+    على أي تطابق.
+    """
+    if not text:
+        return 0
+
+    found_numbers = []
+    for pattern in YEARS_EXPERIENCE_PATTERNS:
+        for m in re.findall(pattern, text):
+            try:
+                found_numbers.append(int(m))
+            except (ValueError, TypeError):
+                continue
+
+    return max(found_numbers) if found_numbers else 0
+
+
+def detect_experience_level(full_text: str, extracted_skills: list) -> str:
+    """
+    تستنتج مستوى خبرة المستخدم (junior/senior) من 3 مؤشرات تُحتسب كأصوات:
+    سنوات الخبرة المصرّح بها، عدد المهارات المستخرجة، وكلمات مفتاحية
+    بالعناوين الوظيفية. عند تعادل الأصوات أو عدم كفاية المؤشرات، نفترض
+    "junior" افتراضياً (الخيار الأكثر أماناً، لا يستبعد متطلبات أساسية).
+    """
+    text_lower = (full_text or "").lower()
+    senior_votes = 0
+    junior_votes = 0
+
+    # 1) سنوات الخبرة
+    years = extract_years_of_experience(text_lower)
+    if years >= SENIOR_YEARS_THRESHOLD:
+        senior_votes += 1
+    elif years > 0:
+        junior_votes += 1
+
+    # 2) عدد المهارات المستخرجة
+    skills_count = len(extracted_skills or [])
+    if skills_count >= SENIOR_SKILLS_COUNT_THRESHOLD:
+        senior_votes += 1
+    else:
+        junior_votes += 1
+
+    # 3) كلمات مفتاحية بالعناوين الوظيفية
+    has_senior_kw = any(re.search(r'\b' + re.escape(k) + r'\b', text_lower) for k in SENIOR_TITLE_KEYWORDS)
+    has_junior_kw = any(re.search(r'\b' + re.escape(k) + r'\b', text_lower) for k in JUNIOR_TITLE_KEYWORDS)
+
+    if has_senior_kw and not has_junior_kw:
+        senior_votes += 1
+    elif has_junior_kw and not has_senior_kw:
+        junior_votes += 1
+
+    return "senior" if senior_votes > junior_votes else EXPERIENCE_LEVEL_DEFAULT
+
+
+
+# ==========================================
 # 2. دالة استخراج المهارات من النص (OCR Text)
 # ==========================================
 def extract_skills(ocr_data):
@@ -184,9 +269,10 @@ def extract_skills(ocr_data):
 # ==========================================
 # 3. دالة مطابقة المهارات وحساب المسار الوظيفي
 # ==========================================
-def analyze_career_paths(extracted_list):
+def analyze_career_paths(extracted_list, experience_level="junior"):
     """
-    تقارن مهارات المستخدم المستخرجة مع كل المسارات الوظيفية وتحسب النسبة المئوية للتوافق
+    تقارن مهارات المستخدم المستخرجة مع كل المسارات الوظيفية وتحسب النسبة المئوية للتوافق.
+    تعتمد على متطلبات المستوى المحدد (junior/senior) من قاعدة البيانات لكل مسار.
     """
     career_paths_raw = {}
     extracted_clean = [s.lower().replace(" ", "") for s in extracted_list]
@@ -208,10 +294,13 @@ def analyze_career_paths(extracted_list):
 
         return False
 
-    # فحص وحساب توافق المهارات لكل مسار متوفر في الـ JSON
+    # فحص وحساب توافق المهارات لكل مسار متوفر في الـ JSON، بناءً على
+    # متطلبات المستوى المحدد (junior/senior). إذا لم يوجد المستوى المطلوب
+    # لأي سبب، نرجع افتراضياً لـ junior كقيمة أكثر أماناً.
     for career_title, career_data in SKILLS_DB.items():
-        required = career_data.get("required_skills", [])
-        nice_to_have = career_data.get("nice_to_have", [])
+        level_data = career_data.get(experience_level, career_data.get("junior", {}))
+        required = level_data.get("required_skills", [])
+        nice_to_have = level_data.get("nice_to_have", [])
 
         matched_required = [s for s in required if is_skill_covered(s, extracted_clean)]
         matched_nice = [s for s in nice_to_have if is_skill_covered(s, extracted_clean)]

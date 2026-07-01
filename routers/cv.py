@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from models.schemas import CVAnalysisResponse
 from services.pdf_parser import extract_text_from_pdf
-from services.analyze import extract_skills, analyze_career_paths, analyze_cv_ats
+from services.analyze import extract_skills, analyze_career_paths, analyze_cv_ats, detect_experience_level
 import shutil
 import os
 from langdetect import detect
@@ -69,9 +69,12 @@ async def analyze_cv(
         full_text = " ".join([item[1] for item in ocr_data if len(item) > 1 and item[1]])
         # 2. استخراج المهارات
         skills = extract_skills(ocr_data)
-        
-        # 3. استدعاء الخوارزمية
-        all_analysis = analyze_career_paths(skills)
+
+        # 🔥 استنتاج مستوى الخبرة (junior/senior) من النص والمهارات المستخرجة
+        experience_level = detect_experience_level(full_text, skills)
+
+        # 3. استدعاء الخوارزمية (بناءً على متطلبات المستوى المستنتج)
+        all_analysis = analyze_career_paths(skills, experience_level=experience_level)
         
         target_title = mapping.get(career_path.lower(), "Frontend Developer")
 
@@ -103,6 +106,7 @@ async def analyze_cv(
         return CVAnalysisResponse(
             detected_language=detected_language,
             extracted_skills=skills,
+            experience_level=experience_level,  # 🔥 جديد: junior أو senior
             career_paths=[{
                 "title": selected_path_data.get("title", target_title),
                 "match_score": int(selected_path_data.get("match_score", 0)),

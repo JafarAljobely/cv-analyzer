@@ -17,6 +17,7 @@ class ATSAnalysisDetail(BaseModel):
 class CVAnalysisResponse(BaseModel):
     detected_language: str
     extracted_skills: List[str]
+    experience_level: str  # 🔥 جديد: "junior" أو "senior"
     career_paths: List[CareerPathDetail]
     top_recommendation: str
     ats_analysis: ATSAnalysisDetail  # 🔥 ربط التقرير بالرد النهائي
