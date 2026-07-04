@@ -60,8 +60,8 @@
         "nice_to_have": ["Python", "Node.js", "Express.js", "MySQL", "PostgreSQL", "Java", "PHP"]
       },
       "senior": {
-        "required_skills": ["Git", "OOP", "Algorithm", "Data Structures", "SQL", "REST API", "Authentication", "Microservices"],
-        "nice_to_have": ["Docker", "Kafka", "RabbitMQ", "CI/CD", "Redis", "MongoDB", "Spring Boot", ".NET", "FastAPI", "Django"]
+        "required_skills": ["Git", "Data Structures", "SQL", "REST API", "Authentication", "Microservices", "Docker"],
+        "nice_to_have": [ "Kafka", "RabbitMQ", "CI/CD", "Redis", "MongoDB", "Spring Boot", ".NET", "FastAPI", "Django"]
       }
     },
     "Full Stack Developer": {
