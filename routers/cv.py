@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from models.schemas import CVAnalysisResponse
 from services.pdf_parser import extract_text_from_pdf
 from services.analyze import extract_skills, analyze_career_paths, analyze_cv_ats, detect_experience_level
+from services.gemini_service import analyze_cv_with_gemini
 import shutil
 import os
 from langdetect import detect
@@ -24,10 +25,23 @@ except:
 def extract_text_from_docx(file_path):
     doc = Document(file_path)
     valid_blocks = []
+    
+    # 1. استخراج النصوص من الفقرات العادية
     for paragraph in doc.paragraphs:
         text = paragraph.text.strip()
         if text:
             valid_blocks.append([None, text])
+    
+    # 2. 🔥 الحل: استخراج النصوص من داخل الجداول
+    # هذا سيضمن قراءة أي مهارات موجودة في جداول
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                # قراءة نص كل خلية وتنظيفه
+                cell_text = cell.text.strip()
+                if cell_text:
+                    valid_blocks.append([None, cell_text])
+                    
     return valid_blocks
 
 @router.post("/analyze", response_model=CVAnalysisResponse)
@@ -102,11 +116,35 @@ async def analyze_cv(
             ocr_data=ocr_data
         )
 
+        ai_assessment = analyze_cv_with_gemini(
+            extracted_text=full_text,
+            extracted_skills=skills,
+            chosen_path=mapping.get(career_path, career_path)
+        )
+
+        # استخراج بيانات الـ ATS بشكل آمن تماماً سواء كان ats_report كائن (Object) أو قاموس (dict)
+        if isinstance(ats_report, dict):
+            ats_dict = {
+                "is_compliant": ats_report.get("is_compliant", False),
+                "score": ats_report.get("score", 0),
+                "issues": ats_report.get("issues", []),
+                "passed": ats_report.get("passed", []),
+                "ai_ats_report": ai_assessment.ai_ats_report
+            }
+        else:
+            ats_dict = {
+                "is_compliant": getattr(ats_report, "is_compliant", False),
+                "score": getattr(ats_report, "score", 0),
+                "issues": getattr(ats_report, "issues", []),
+                "passed": getattr(ats_report, "passed", []),
+                "ai_ats_report": ai_assessment.ai_ats_report
+            }
+
         # 6. الرد الصافي للفرونت إند (مع تقرير الـ ATS)
         return CVAnalysisResponse(
             detected_language=detected_language,
             extracted_skills=skills,
-            experience_level=experience_level,  # 🔥 جديد: junior أو senior
+            experience_level=ai_assessment.experience_level,
             career_paths=[{
                 "title": selected_path_data.get("title", target_title),
                 "match_score": int(selected_path_data.get("match_score", 0)),
@@ -114,7 +152,9 @@ async def analyze_cv(
                 "missing_skills": selected_path_data.get("missing_skills", [])
             }],
             top_recommendation=all_analysis.get("top_recommendation", target_title),
-            ats_analysis=ats_report  # 🔥 إرفاق تقرير الـ ATS الفعلي
+            is_path_suitable=ai_assessment.is_path_suitable,   # حقل جديد من Gemini
+            ai_path_feedback=ai_assessment.ai_path_feedback,
+            ats_analysis=ats_dict
         )
 
     except Exception as e:

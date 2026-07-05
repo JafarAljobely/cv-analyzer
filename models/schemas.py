@@ -13,11 +13,14 @@ class ATSAnalysisDetail(BaseModel):
     score: int
     issues: List[str]
     passed: List[str]
+    ai_ats_report: str
 
 class CVAnalysisResponse(BaseModel):
     detected_language: str
     extracted_skills: List[str]
-    experience_level: str  # 🔥 جديد: "junior" أو "senior"
+    experience_level: str
     career_paths: List[CareerPathDetail]
     top_recommendation: str
-    ats_analysis: ATSAnalysisDetail  # 🔥 ربط التقرير بالرد النهائي
+    is_path_suitable: bool
+    ai_path_feedback: str
+    ats_analysis: ATSAnalysisDetail 

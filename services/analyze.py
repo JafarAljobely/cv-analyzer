@@ -438,7 +438,7 @@ def detect_multi_column_layout(pdf_path, ocr_data=None):
 # ==========================================
 def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, ocr_data=None) -> dict:
     """
-    تقوم بفحص حقيقي لبنية الملف وهيكليته ومصطلحاته لتقييم توافقه مع الـ ATS
+    نسخة محسنة ومرنة من فحص الـ ATS
     """
     issues = []
     passed = []
@@ -447,30 +447,21 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
     # -----------------------------------------
     # 1. فحص وجود جداول حقيقية (PDF + DOCX)
     # -----------------------------------------
-    has_tables = False
-
-    if pdf_path.endswith('.pdf'):
-        try:
-            with pdfplumber.open(pdf_path) as pdf:
-                for page in pdf.pages:
-                    if page.extract_tables():
-                        has_tables = True
-                        break
-        except Exception:
-            pass
-
-    elif pdf_path.endswith('.docx'):
+    has_complex_tables = False
+    if pdf_path.endswith('.docx'):
         try:
             doc = Document(pdf_path)
-            has_tables = len(doc.tables) > 0
-        except Exception:
+            # فحص عدد الجداول وكثافتها
+            if len(doc.tables) > 2: # خصم فقط إذا كان هناك الكثير من الجداول (تصميم معقد)
+                has_complex_tables = True
+        except:
             pass
 
-    if has_tables:
-        issues.append("تم اكتشاف جداول داخل الملف. بعض أنظمة ATS تفشل في معالجتها، يفضل استخدام نصوص مباشرة متتالية.")
-        score -= 30
+    if has_complex_tables:
+        issues.append("تم اكتشاف عدد كبير من الجداول، يفضل تقليلها لتسهيل قراءة النص بأنظمة الـ ATS.")
+        score -= 10 # خصم بسيط كتحذير فقط
     else:
-        passed.append("بنية السيرة الذاتية ممتازة وخالية من الجداول المعقدة.")
+        passed.append("تنسيق السيرة الذاتية متوافق مع معايير الـ ATS.")
 
     # -----------------------------------------
     # 2. فحص تخطيط الأعمدة المتعددة (PDF فقط)
@@ -492,10 +483,10 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
     found_headings = [h for h in standard_headings if re.search(r'\b' + h + r'\b', text_lower)]
 
     if len(found_headings) >= 2:
-        passed.append(f"تم استخدام عناوين أقسام قياسية واضحة لسهولة الفهرسة الآلية مثل ({', '.join(found_headings[:2])}).")
+        passed.append("العناوين الرئيسية واضحة.")
     else:
-        issues.append("العناوين الرئيسية للأقسام غير واضحة أو تستخدم مصطلحات إبداعية. التزم بالعناوين القياسية مثل Experience و Skills.")
-        score -= 30
+        issues.append("نوصي باستخدام عناوين قياسية (مثل Experience, Skills) لتحسين الفهرسة.")
+        score -= 10
 
     # -----------------------------------------
     # 4. فحص الكلمات المفتاحية الدقيقة
@@ -503,11 +494,15 @@ def analyze_cv_ats(pdf_path: str, extracted_text: str, expected_skills: list, oc
     matched_keywords = [skill for skill in expected_skills if skill.lower() in text_lower]
     match_ratio = len(matched_keywords) / len(expected_skills) if expected_skills else 0
 
-    if match_ratio >= 0.4:
-        passed.append("تم تضمين المصطلحات التقنية الأساسية والكلمات المفتاحية المطلوبة بدقة.")
+    # نظام التقييم التراكمي
+    if match_ratio >= 0.5:
+        passed.append("تضمن السيرة الذاتية الكلمات المفتاحية الأساسية.")
+    elif match_ratio >= 0.2:
+        issues.append(f"تطابق المهارات مقبول ({int(match_ratio*100)}%)، نوصي بإضافة المزيد من الكلمات المفتاحية.")
+        score -= 15
     else:
-        issues.append("السيرة الذاتية تفتقر للكلمات المفتاحية والمصطلحات الدقيقة الخاصة بهذا المسار الوظيفي.")
-        score -= 40
+        issues.append("السيرة الذاتية تفتقر للمهارات المطلوبة للمسار المختار.")
+        score -= 30
 
     score = max(0, min(100, score))
     is_compliant = score >= 60
