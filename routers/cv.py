@@ -6,20 +6,12 @@ from services.gemini_service import analyze_cv_with_gemini
 import shutil
 import os
 from langdetect import detect
-from docx import Document # 🔥 استدعاء مكتبة قراءة ملفات الـ Word
+from docx import Document
 
 router = APIRouter()
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-try:
-    detected_language = detect(full_text)
-except:
-    detected_language = "unknown"
-
-
-
 
 # 🔥 دالة قراءة ملفات الـ Word بسرعة وبدون OCR
 def extract_text_from_docx(file_path):
@@ -81,6 +73,13 @@ async def analyze_cv(
 
         # 🔥 تجهيز النص ككتلة واحدة (String) لإرساله لدالة الـ ATS
         full_text = " ".join([item[1] for item in ocr_data if len(item) > 1 and item[1]])
+
+        try:
+             detected_language = detect(full_text)
+        except:
+            detected_language = "unknown"
+
+
         # 2. استخراج المهارات
         skills = extract_skills(ocr_data)
 

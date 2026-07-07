@@ -46,52 +46,52 @@
   "SKILLS_DB": {
     "Frontend Developer": {
       "junior": {
-        "required_skills": ["HTML", "CSS", "JavaScript", "Responsive Design", "Git"],
-        "nice_to_have": ["Sass", "Bootstrap", "Tailwind CSS", "jQuery", "Figma", "TypeScript", "React.js"]
+        "required_skills": ["HTML", "CSS", "JavaScript", "Responsive Design", "DOM Manipulation", "Git"],
+        "nice_to_have": ["Sass", "Tailwind CSS", "Bootstrap", "React.js", "Vue.js", "Figma", "REST API", "Browser DevTools"]
       },
       "senior": {
-        "required_skills": ["HTML", "CSS", "JavaScript", "TypeScript", "DOM Manipulation", "Responsive Design", "Git", "REST API", "React.js"],
-        "nice_to_have": ["Redux", "Webpack", "Vite", "Next.js", "Vue.js", "Angular", "GraphQL", "Jest", "Cypress", "Web Accessibility", "PWA", "Web Performance Optimization"]
+        "required_skills": ["JavaScript", "TypeScript", "React.js", "Next.js", "Web Performance Optimization", "Cross-Browser Compatibility", "Web Accessibility", "REST API", "Git"],
+        "nice_to_have": ["Redux", "Zustand", "GraphQL", "Jest", "Cypress", "PWA", "Webpack", "Vite", "Micro Frontends", "Docker"]
       }
     },
     "Backend Developer": {
       "junior": {
-        "required_skills": ["Git", "SQL", "REST API", "OOP"],
-        "nice_to_have": ["Python", "Node.js", "Express.js", "MySQL", "PostgreSQL", "Java", "PHP"]
+        "required_skills": ["Git", "SQL", "Data Structures", "REST API", "MySQL"],
+        "nice_to_have": ["Python", "Node.js", "PHP", "PostgreSQL", "Express.js", "Postman"]
       },
       "senior": {
-        "required_skills": ["Git", "OOP", "Algorithm", "Data Structures", "SQL", "REST API", "Authentication", "Microservices"],
-        "nice_to_have": ["Docker", "Kafka", "RabbitMQ", "CI/CD", "Redis", "MongoDB", "Spring Boot", ".NET", "FastAPI", "Django"]
+        "required_skills": ["System Design", "Microservices", "Design Patterns", "Database Optimization", "Authentication", "JWT", "OAuth", "SQL", "Git"],
+        "nice_to_have": ["Docker", "Kubernetes", "Kafka", "RabbitMQ", "Redis", "Elasticsearch", "CI/CD", "AWS", "Go", "Rust"]
       }
     },
     "Full Stack Developer": {
       "junior": {
-        "required_skills": ["HTML", "CSS", "JavaScript", "Git", "SQL"],
-        "nice_to_have": ["React.js", "Node.js", "MySQL", "PostgreSQL", "Python", "PHP"]
+        "required_skills": ["HTML", "CSS", "JavaScript", "Git", "SQL", "REST API", "OOP", "Data Structures"],
+        "nice_to_have": ["React.js", "Node.js", "Python", "MySQL", "Tailwind CSS", "Express.js", "Postman"]
       },
       "senior": {
-        "required_skills": ["HTML", "CSS", "JavaScript", "Git", "SQL", "REST API", "OOP", "Docker"],
-        "nice_to_have": ["TypeScript", "GraphQL", "Microservices", "CI/CD", "Next.js", "Redis", "Vue.js", "Angular"]
+        "required_skills": ["TypeScript", "System Design", "Database Design", "Microservices", "Authentication", "Web Performance Optimization", "Git", "Docker", "CI/CD"],
+        "nice_to_have": ["Next.js", "GraphQL", "Kubernetes", "Redis", "AWS", "GCP", "Message Queues", "Caching"]
       }
     },
     "AI Engineer": {
       "junior": {
-        "required_skills": ["Python", "SQL", "NumPy", "Pandas"],
-        "nice_to_have": ["Matplotlib", "Jupyter", "Scikit-learn", "Git", "Seaborn"]
+        "required_skills": ["Python", "SQL", "Statistics", "Algorithm", "Data Structures", "NumPy", "Pandas"],
+        "nice_to_have": ["Matplotlib", "Jupyter", "Scikit-learn", "Git", "Data Visualization", "ETL"]
       },
       "senior": {
-        "required_skills": ["Python", "Algorithm", "Statistics", "SQL", "NumPy", "Pandas", "Machine Learning", "Deep Learning"],
-        "nice_to_have": ["TensorFlow", "PyTorch", "MLOps", "NLP", "Computer Vision", "Hugging Face", "LangChain", "Keras", "OpenCV", "A/B Testing"]
+        "required_skills": ["Python", "Machine Learning", "Deep Learning", "System Design", "MLOps", "Model Deployment", "TensorFlow", "PyTorch"],
+        "nice_to_have": ["NLP", "Computer Vision", "Hugging Face", "LangChain", "Apache Spark", "Docker", "Kubernetes", "AWS", "GCP"]
       }
     },
     "Network Engineer": {
       "junior": {
-        "required_skills": ["Linux", "Networking Fundamentals", "TCP/IP", "Git"],
-        "nice_to_have": ["DNS", "Wireshark", "Bash", "DHCP", "HTTP/HTTPS"]
+        "required_skills": ["Networking Fundamentals", "TCP/IP", "OSI Model", "Subnetting", "Linux", "Git"],
+        "nice_to_have": ["DNS", "DHCP", "Wireshark", "Bash", "Routing", "Switching"]
       },
       "senior": {
-        "required_skills": ["Linux", "Bash", "Networking Fundamentals", "TCP/IP", "Git", "Python", "Network Security", "Routing", "Switching"],
-        "nice_to_have": ["Cisco", "Firewall", "VPN", "VLAN", "Docker", "AWS", "Azure", "GCP", "Kubernetes", "Terraform", "Ansible", "CI/CD", "Load Balancing", "Monitoring Tools"]
+        "required_skills": ["Network Security", "Routing", "Switching", "Firewall", "BGP", "OSPF", "VPN", "Linux", "Python"],
+        "nice_to_have": ["Cisco", "Load Balancing", "Docker Networking", "Ansible", "Terraform", "Prometheus", "Grafana", "AWS Networking"]
       }
     }
   }
